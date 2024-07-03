@@ -1,5 +1,6 @@
 #include "Game.h"
 #include <SDL2/SDL.h>
+#include <glm/glm.hpp>
 #include <SDL2/SDL_image.h>
 #include <iostream>
 
@@ -50,14 +51,6 @@ void Game::Initialize() {
     
 }
 
-void Game::Run() {
-    while (isRunning) {
-        ProcessInput();
-        Update();
-        Render();
-    }
-
-}
 
 void Game::ProcessInput() {
     SDL_Event sdlEvent;
@@ -76,18 +69,45 @@ void Game::ProcessInput() {
     };
 }
 
-void Game::Setup() {
+glm::vec2 playerPosition;
+glm::vec2 playerVelocity;
 
+void Game::Setup() {
+    playerPosition = glm::vec2(10.0, 20.0);
+    playerVelocity = glm::vec2(10.0, 5.0);
 }
 
-void Game::Update() {
+void Game::Run() {
+    Setup();
+    while (isRunning) {
+        ProcessInput();
+        Update();
+        Render();
+    }
+}
 
+
+void Game::Update() {
+    // if too fast, wait until required time elapse
+    int timeToWait = MILLISECS_PER_FRAME - (SDL_GetTicks() - millisecPreviousFrame);
+    
+    if (timeToWait > 0 && timeToWait <= MILLISECS_PER_FRAME) {
+        SDL_Delay(timeToWait);
+    }
+
+    // the difference in ticks since the last frame
+    double deltaTime = (SDL_GetTicks() - millisecPreviousFrame) / 1000.0;
+
+    // store the current frame time
+    millisecPreviousFrame = SDL_GetTicks();
+
+    playerPosition.x += playerVelocity.x * deltaTime;
+    playerPosition.y += playerVelocity.y * deltaTime;
 }
 
 void Game::Render() {
     SDL_SetRenderDrawColor(renderer, 21, 21, 21, 255);
     SDL_RenderClear(renderer);
-
 
     // draw a PNG
     SDL_Surface* surface = IMG_Load("./assets/images/tank-tiger-right.png");
@@ -95,7 +115,12 @@ void Game::Render() {
     SDL_FreeSurface(surface);
 
     // the rectangle to place texture
-    SDL_Rect destRect = {10, 10, 32, 32};
+    SDL_Rect destRect = {
+        static_cast<int>(playerPosition.x),
+        static_cast<int>(playerPosition.y),
+        32,
+        32
+    };
     SDL_RenderCopy(renderer, texture, NULL, &destRect);
 
     SDL_DestroyTexture(texture);
