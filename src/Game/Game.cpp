@@ -8,6 +8,7 @@
 
 Game::Game() {
     isRunning = false;
+    registry = std::make_unique<Registry>();
     Logger::Log("Game constructor called");
 }
 
@@ -74,8 +75,7 @@ glm::vec2 playerPosition;
 glm::vec2 playerVelocity;
 
 void Game::Setup() {
-    playerPosition = glm::vec2(10.0, 20.0);
-    playerVelocity = glm::vec2(10.0, 5.0);
+    Entity tank = registry->CreateEntity();
 }
 
 void Game::Run() {
