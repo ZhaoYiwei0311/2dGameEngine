@@ -1,6 +1,11 @@
 #include "Game.h"
 #include "../Logger/Logger.h"
 #include "../ECS/ECS.h"
+#include "../Components/TransformComponent.h"
+#include "../Components/RigidBodyComponent.h"
+#include "../Components/SpriteComponent.h"
+#include "../Systems/MovementSystem.h"
+#include "../Systems/RenderSystem.h"
 #include <SDL2/SDL.h>
 #include <glm/glm.hpp>
 #include <SDL2/SDL_image.h>
@@ -75,7 +80,19 @@ glm::vec2 playerPosition;
 glm::vec2 playerVelocity;
 
 void Game::Setup() {
+    // add the systems that need to be processed in game
+    registry->AddSystem<MovementSystem>();
+    registry->AddSystem<RenderSystem>();
+
     Entity tank = registry->CreateEntity();
+    tank.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
+    tank.AddComponent<RigidBodyComponent>(glm::vec2(10.0, 50.0));
+    tank.AddComponent<SpriteComponent>(10.0, 10.0);
+
+    Entity truck = registry->CreateEntity();
+    truck.AddComponent<TransformComponent>(glm::vec2(50.0, 300.0), glm::vec2(1.0, 1.0), 0.0);
+    truck.AddComponent<RigidBodyComponent>(glm::vec2(10.0, 50.0));
+    truck.AddComponent<SpriteComponent>(10.0, 10.0);
 }
 
 void Game::Run() {
@@ -86,7 +103,6 @@ void Game::Run() {
         Render();
     }
 }
-
 
 void Game::Update() {
     // if too fast, wait until required time elapse
@@ -102,31 +118,25 @@ void Game::Update() {
     // store the current frame time
     millisecPreviousFrame = SDL_GetTicks();
 
-    playerPosition.x += playerVelocity.x * deltaTime;
-    playerPosition.y += playerVelocity.y * deltaTime;
+    // update registry to process entities that are waiting to be created / deleted
+    registry->Update();
+
+    // ask all the systems to update
+    registry->GetSystem<MovementSystem>().Update(deltaTime);
+
+
 }
 
 void Game::Render() {
     SDL_SetRenderDrawColor(renderer, 21, 21, 21, 255);
     SDL_RenderClear(renderer);
 
-    // draw a PNG
-    SDL_Surface* surface = IMG_Load("./assets/images/tank-tiger-right.png");
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_FreeSurface(surface);
-
-    // the rectangle to place texture
-    SDL_Rect destRect = {
-        static_cast<int>(playerPosition.x),
-        static_cast<int>(playerPosition.y),
-        32,
-        32
-    };
-    SDL_RenderCopy(renderer, texture, NULL, &destRect);
-
-    SDL_DestroyTexture(texture);
+    // invoke all the systems that need to render
+    registry->GetSystem<RenderSystem>().Update(renderer);
 
     SDL_RenderPresent(renderer);
+
+
 }
 
 void Game::Destroy() {
