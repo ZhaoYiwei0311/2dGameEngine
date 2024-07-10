@@ -9,6 +9,7 @@
 #include <typeindex>
 #include <set>
 #include <memory>
+#include <deque>
 
 const unsigned int MAX_COMPONENTS = 32;
 
@@ -41,6 +42,7 @@ class Entity {
     public:
         Entity(int id): id(id) {};
         Entity(const Entity& entity) = default;
+        void Kill();
         int GetId() const;
 
         Entity& operator =(const Entity& other) = default;
@@ -151,6 +153,9 @@ class Registry {
         std::set<Entity> entitiesToBeAdded;
         std::set<Entity> entitiesToBeKilled;
 
+        // list of free entity ids that were previously removed
+        std::deque<int> freeIds;
+
     public:
         Registry() {
             Logger::Log("Registry constructor called");
@@ -165,6 +170,7 @@ class Registry {
 
         // entity management
         Entity CreateEntity();
+        void KillEntity(Entity entity);
 
         // component management
         template <typename TComponent, typename ...TArgs> void AddComponent(Entity entity, TArgs&& ...args);
@@ -180,6 +186,7 @@ class Registry {
 
         // check the component signature of an entity and add the entity to systems that are interested in it
         void AddEntityToSystems(Entity entity);
+        void RemoveEntityFromSystems(Entity entity);
 
 };
 

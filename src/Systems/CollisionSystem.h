@@ -28,8 +28,8 @@ class CollisionSystem: public System {
                         continue;
                     }
 
-                    auto bTransform = a.GetComponent<TransformComponent>();
-                    auto bCollider = a.GetComponent<BoxColliderComponent>();
+                    auto bTransform = b.GetComponent<TransformComponent>();
+                    auto bCollider = b.GetComponent<BoxColliderComponent>();
 
                     // AABB collision check
                     bool collisionHappend = CheckAABBCollision(
@@ -45,6 +45,9 @@ class CollisionSystem: public System {
 
                     if (collisionHappend) {
                         Logger::Log("Entity " + std::to_string(a.GetId()) + " is colliding with " + std::to_string(b.GetId()));
+
+                        a.Kill();
+                        b.Kill();
                     }
 
                 }
