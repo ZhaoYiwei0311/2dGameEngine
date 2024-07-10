@@ -3,10 +3,11 @@
 
 #include "../ECS/ECS.h"
 #include "../AssetStore/AssetStore.h"
+#include "../EventBus/EventBus.h"
 #include <SDL2/SDL.h>
 #include <memory>
 
-const int FPS = 120;
+const int FPS = 3;
 const int MILLISECS_PER_FRAME = 1000 / FPS;
 class Game {
     private:
@@ -18,6 +19,7 @@ class Game {
 
         std::unique_ptr<Registry> registry;
         std::unique_ptr<AssetStore> assetStore;
+        std::unique_ptr<EventBus> eventBus;
 
     public:
         Game();
