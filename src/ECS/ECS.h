@@ -175,14 +175,14 @@ class Registry {
         // component management
         template <typename TComponent, typename ...TArgs> void AddComponent(Entity entity, TArgs&& ...args);
         template <typename TComponent> void RemoveComponent(Entity entity);
-        template <typename TComponent> void HasComponent(Entity entity);
+        template <typename TComponent> bool HasComponent(Entity entity) const;
         template <typename TComponent> TComponent& GetComponent(Entity entity) const;
 
         // system management
         template <typename TSystem, typename ...TArgs> void AddSystem(TArgs&& ...args);
         template <typename TSystem> void RemoveSystem();
         template <typename TSystem> bool HasSystem() const;
-        template <typename TSystem> TSystem GetSystem() const;
+        template <typename TSystem> TSystem& GetSystem() const;
 
         // check the component signature of an entity and add the entity to systems that are interested in it
         void AddEntityToSystems(Entity entity);
@@ -214,7 +214,7 @@ bool Registry::HasSystem() const {
 }
 
 template <typename TSystem>
-TSystem Registry::GetSystem() const {
+TSystem& Registry::GetSystem() const {
     auto system = systems.find(std::type_index(typeid(TSystem)));
     return *(std::static_pointer_cast<TSystem>(system->second));
 }
@@ -258,10 +258,10 @@ void Registry::RemoveComponent(Entity entity) {
 }
 
 template <typename TComponent>
-void Registry::HasComponent(Entity entity) {
-    const auto componentId = Component<TComponent>::GetId();
-    const auto entityId = entity.GetId();
-    return entityComponentSignatures[entityId].test(componentId);
+bool Registry::HasComponent(Entity entity) const {
+	const auto componentId = Component<TComponent>::GetId();
+	const auto entityId = entity.GetId();
+	return entityComponentSignatures[entityId].test(componentId);
 }
 
 template <typename TComponent>
