@@ -39,8 +39,6 @@ class DamageSystem: public System {
             if (b.BelongsToGroup("projectiles") && a.BelongsToGroup("enemies")) {
                 OnProjectileHitsEnemy(b, a);
             }
-
-
         }
 
         void OnProjectileHitsPlayer(Entity projectile, Entity player) {
