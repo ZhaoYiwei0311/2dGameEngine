@@ -13,9 +13,9 @@
 #include <memory>
 #include <glm/glm.hpp>
 
-class RenderGuiSystem: public System {
+class RenderGUISystem: public System {
     public:
-        RenderGuiSystem() = default;
+        RenderGUISystem() = default;
 
         void Update(const std::unique_ptr<Registry>& registry, const SDL_Rect& camera) {
             ImGui::NewFrame();
